@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Expense Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:         #0f0f0f;
+      --surface:    #1a1a1a;
+      --border:     #2a2a2a;
+      --accent:     #00e5a0;
+      --accent2:    #ff6b6b;
+      --text:       #e8e8e8;
+      --muted:      #666;
+      --income:     #00e5a0;
+      --expense:    #ff6b6b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 13px;
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    header h1 {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: -0.5px;
+    }
+
+    header .month {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .total-banner {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .total-banner .label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .total-banner .amount {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .section-title {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 10px;
+    }
+
+    /* ── BAR CHART ── */
+    .bar-chart {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 14px;
+      margin-bottom: 20px;
+    }
+
+    .bar-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+      gap: 8px;
+    }
+
+    .bar-label {
+      width: 120px;
+      font-size: 11px;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex-shrink: 0;
+    }
+
+    .bar-track {
+      flex: 1;
+      height: 14px;
+      background: var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: var(--accent);
+      transition: width 0.6s ease;
+      position: relative;
+    }
+
+    .bar-fill::after {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 2px;
+      height: 100%;
+      background: rgba(255,255,255,0.3);
+    }
+
+    .bar-value {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      color: var(--accent);
+      width: 60px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    /* ── PIE CHART ── */
+    .pie-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 14px;
+      margin-bottom: 20px;
+    }
+
+    .pie-container {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    canvas#pieChart {
+      flex-shrink: 0;
+    }
+
+    .pie-legend {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .legend-name {
+      flex: 1;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .legend-pct {
+      font-family: 'IBM Plex Mono', monospace;
+      color: var(--muted);
+    }
+
+    /* ── RECENT TRANSACTIONS ── */
+    .transactions {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+
+    .tx-row {
+      display: grid;
+      grid-template-columns: 40px 14px 70px 1fr 80px;
+      gap: 8px;
+      align-items: center;
+      padding: 9px 14px;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+
+    .tx-row:last-child { border-bottom: none; }
+    .tx-row:hover { background: #222; }
+
+    .tx-date {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .tx-type {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    .tx-type.E { color: var(--expense); }
+    .tx-type.I { color: var(--income); }
+
+    .tx-category {
+      font-size: 11px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tx-vendor {
+      font-size: 12px;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tx-cost {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+      text-align: right;
+    }
+
+    .tx-cost.E { color: var(--expense); }
+    .tx-cost.I { color: var(--income); }
+
+    /* ── LOADING / ERROR ── */
+    .state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--muted);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+    }
+
+    .state.error { color: var(--expense); }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin-bottom: 8px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .refresh-btn {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .refresh-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>// expenses</h1>
+    <span class="month" id="monthLabel">loading...</span>
+  </header>
+
+  <div id="app">
+    <div class="state">
+      <div class="spinner"></div>
+      <div>fetching data...</div>
+    </div>
+  </div>
+
+  <script>
+    // ─────────────────────────────────────────
+    //  CONFIG — paste your deployment URL here
+    // ─────────────────────────────────────────
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz1m92kfW8ePdU26NrmlfDxV3QYorf-6IbD02na6fSJP6pDDqWWJX60u8ddptWlys1e/exec";
+
+    const COLORS = [
+      "#00e5a0","#ff6b6b","#ffd93d","#6bcbff","#c77dff",
+      "#ff9f43","#a8e063","#fd79a8","#74b9ff","#fdcb6e"
+    ];
+
+    function loadData() {
+      const app = document.getElementById("app");
+
+      const xhr     = new XMLHttpRequest();
+      const timeout = setTimeout(() => {
+        xhr.abort();
+        app.innerHTML = `
+          <div class="state error">request timed out — script may be cold starting, try refreshing</div>
+          <button class="refresh-btn" style="margin-top:12px" onclick="location.reload()">↺  retry</button>
+        `;
+      }, 20000);
+
+      xhr.open("GET", `${SCRIPT_URL}?action=getPageData`, true);
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState !== 4) return;
+        clearTimeout(timeout);
+        if (xhr.status === 200) {
+          try {
+            const data = JSON.parse(xhr.responseText);
+            render(data);
+          } catch(e) {
+            app.innerHTML = `<div class="state error">failed to parse response: ${e.message}</div>`;
+          }
+        } else {
+          app.innerHTML = `
+            <div class="state error">failed to load: HTTP ${xhr.status}</div>
+            <button class="refresh-btn" style="margin-top:12px" onclick="location.reload()">↺  retry</button>
+          `;
+        }
+      };
+      xhr.onerror = function() {
+        clearTimeout(timeout);
+        app.innerHTML = `
+          <div class="state error">network error — check your connection and try again</div>
+          <button class="refresh-btn" style="margin-top:12px" onclick="location.reload()">↺  retry</button>
+        `;
+      };
+      xhr.send();
+    }
+
+    function render(data) {
+      const { recent, categoryTotals, monthTotal, month } = data;
+      document.getElementById("monthLabel").textContent = month;
+
+      const app = document.getElementById("app");
+      app.innerHTML = "";
+
+      // ── Total Banner ──
+      const banner = document.createElement("div");
+      banner.className = "total-banner";
+      banner.innerHTML = `
+        <span class="label">Month to Date</span>
+        <span class="amount">$${monthTotal.toFixed(2)}</span>
+      `;
+      app.appendChild(banner);
+
+      // ── Bar Chart ──
+      const sorted = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1]);
+      const max    = sorted.length ? sorted[0][1] : 1;
+
+      const barSection = document.createElement("div");
+      barSection.innerHTML = `<div class="section-title">Spending by Category</div>`;
+      const barChart = document.createElement("div");
+      barChart.className = "bar-chart";
+
+      sorted.forEach(([cat, amt], i) => {
+        const pct = (amt / max) * 100;
+        const row = document.createElement("div");
+        row.className = "bar-row";
+        row.innerHTML = `
+          <div class="bar-label">${cat}</div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:0%;background:${COLORS[i % COLORS.length]}" data-width="${pct}"></div>
+          </div>
+          <div class="bar-value" style="color:${COLORS[i % COLORS.length]}">$${amt.toFixed(0)}</div>
+        `;
+        barChart.appendChild(row);
+      });
+
+      barSection.appendChild(barChart);
+      app.appendChild(barSection);
+
+      // Animate bars after render
+      setTimeout(() => {
+        document.querySelectorAll(".bar-fill").forEach(el => {
+          el.style.width = el.dataset.width + "%";
+        });
+      }, 50);
+
+      // ── Pie Chart ──
+      const pieSection = document.createElement("div");
+      pieSection.innerHTML = `<div class="section-title">Distribution</div>`;
+      const pieWrap = document.createElement("div");
+      pieWrap.className = "pie-section";
+
+      const pieContainer = document.createElement("div");
+      pieContainer.className = "pie-container";
+
+      const canvas = document.createElement("canvas");
+      canvas.id = "pieChart";
+      canvas.width = 130;
+      canvas.height = 130;
+      pieContainer.appendChild(canvas);
+
+      const legend = document.createElement("div");
+      legend.className = "pie-legend";
+      sorted.forEach(([cat, amt], i) => {
+        const pct = monthTotal > 0 ? ((amt / monthTotal) * 100).toFixed(1) : 0;
+        const item = document.createElement("div");
+        item.className = "legend-item";
+        item.innerHTML = `
+          <div class="legend-dot" style="background:${COLORS[i % COLORS.length]}"></div>
+          <div class="legend-name">${cat}</div>
+          <div class="legend-pct">${pct}%</div>
+        `;
+        legend.appendChild(item);
+      });
+
+      pieContainer.appendChild(legend);
+      pieWrap.appendChild(pieContainer);
+      pieSection.appendChild(pieWrap);
+      app.appendChild(pieSection);
+
+      // Draw pie
+      drawPie(canvas, sorted, monthTotal);
+
+      // ── Recent Transactions ──
+      const txSection = document.createElement("div");
+      txSection.innerHTML = `<div class="section-title">Recent Transactions</div>`;
+      const txList = document.createElement("div");
+      txList.className = "transactions";
+
+      if (!recent || recent.length === 0) {
+        txList.innerHTML = `<div class="state">no transactions found</div>`;
+      } else {
+        recent.forEach(tx => {
+          const row = document.createElement("div");
+          row.className = "tx-row";
+          const t = tx.type === "Income" ? "I" : "E";
+          row.innerHTML = `
+            <div class="tx-date">${tx.date}</div>
+            <div class="tx-type ${t}">${t}</div>
+            <div class="tx-category">${tx.category}</div>
+            <div class="tx-vendor">${tx.vendor || "—"}</div>
+            <div class="tx-cost ${t}">$${tx.cost.toFixed(2)}</div>
+          `;
+          txList.appendChild(row);
+        });
+      }
+
+      txSection.appendChild(txList);
+      app.appendChild(txSection);
+
+      // ── Refresh Button ──
+      const btn = document.createElement("button");
+      btn.className = "refresh-btn";
+      btn.textContent = "↺  refresh";
+      btn.onclick = () => {
+        app.innerHTML = `<div class="state"><div class="spinner"></div><div>fetching data...</div></div>`;
+        loadData();
+      };
+      app.appendChild(btn);
+    }
+
+    function drawPie(canvas, sorted, total) {
+      const ctx = canvas.getContext("2d");
+      const cx  = canvas.width / 2;
+      const cy  = canvas.height / 2;
+      const r   = cx - 8;
+
+      if (total === 0 || sorted.length === 0) {
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.fillStyle = "#2a2a2a";
+        ctx.fill();
+        return;
+      }
+
+      let startAngle = -Math.PI / 2;
+      sorted.forEach(([cat, amt], i) => {
+        const slice = (amt / total) * Math.PI * 2;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, r, startAngle, startAngle + slice);
+        ctx.closePath();
+        ctx.fillStyle = COLORS[i % COLORS.length];
+        ctx.fill();
+        ctx.strokeStyle = "#0f0f0f";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        startAngle += slice;
+      });
+
+      // Donut hole
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.5, 0, Math.PI * 2);
+      ctx.fillStyle = "#1a1a1a";
+      ctx.fill();
+    }
+
+    loadData();
+  </script>
+</body>
+</html>
