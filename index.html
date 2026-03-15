@@ -4,18 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <title>Expense Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg:         #0f0f0f;
-      --surface:    #1a1a1a;
-      --border:     #2a2a2a;
-      --accent:     #00e5a0;
-      --accent2:    #ff6b6b;
-      --text:       #e8e8e8;
-      --muted:      #666;
-      --income:     #00e5a0;
-      --expense:    #ff6b6b;
+      --bg:        #f0f2f5;
+      --surface:   #ffffff;
+      --border:    #e2e6ea;
+      --accent:    #2563eb;
+      --accent2:   #1d4ed8;
+      --success:   #16a34a;
+      --danger:    #dc2626;
+      --text:      #1e293b;
+      --muted:     #94a3b8;
+      --income:    #16a34a;
+      --expense:   #dc2626;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -23,79 +25,158 @@
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: 'IBM Plex Sans', sans-serif;
+      font-family: 'DM Sans', sans-serif;
       font-size: 13px;
       min-height: 100vh;
       padding: 16px;
+      max-width: 600px;
+      margin: 0 auto;
     }
 
     header {
       display: flex;
       justify-content: space-between;
-      align-items: flex-end;
-      margin-bottom: 20px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--border);
+      align-items: center;
+      margin-bottom: 16px;
     }
 
     header h1 {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 18px;
+      font-size: 20px;
       font-weight: 600;
       color: var(--accent);
       letter-spacing: -0.5px;
     }
 
-    header .month {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 11px;
+    #periodLabel {
+      font-size: 12px;
       color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 1px;
+      font-family: 'DM Mono', monospace;
     }
 
-    .total-banner {
+    /* ── PERIOD SELECTOR ── */
+    .period-bar {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-left: 3px solid var(--accent);
-      padding: 12px 16px;
-      margin-bottom: 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 14px;
     }
 
-    .total-banner .label {
+    .preset-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 2px;
+    }
+
+    .preset-btn {
+      padding: 5px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--muted);
+      font-family: 'DM Sans', sans-serif;
       font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .preset-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .custom-range {
+      display: none;
+      gap: 8px;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .custom-range.visible { display: flex; }
+
+    .custom-range input {
+      flex: 1;
+      padding: 6px 8px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    .custom-range span { color: var(--muted); font-size: 11px; }
+
+    .go-btn {
+      padding: 6px 14px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+
+    .card-title {
+      font-size: 11px;
+      font-weight: 600;
       color: var(--muted);
       text-transform: uppercase;
       letter-spacing: 1px;
+      margin-bottom: 12px;
     }
 
-    .total-banner .amount {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 22px;
-      font-weight: 600;
-      color: var(--accent);
+    /* ── SUMMARY STRIP ── */
+    .summary-strip {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
     }
 
-    .section-title {
-      font-family: 'IBM Plex Mono', monospace;
+    .summary-tile {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .s-label {
       font-size: 10px;
+      font-weight: 600;
       color: var(--muted);
       text-transform: uppercase;
-      letter-spacing: 2px;
-      margin-bottom: 10px;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
     }
+
+    .s-value {
+      font-family: 'DM Mono', monospace;
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .s-value.income  { color: var(--income); }
+    .s-value.expense { color: var(--expense); }
+    .s-value.net-pos { color: var(--income); }
+    .s-value.net-neg { color: var(--expense); }
 
     /* ── BAR CHART ── */
-    .bar-chart {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      padding: 14px;
-      margin-bottom: 20px;
-    }
-
     .bar-row {
       display: flex;
       align-items: center;
@@ -104,7 +185,7 @@
     }
 
     .bar-label {
-      width: 120px;
+      width: 110px;
       font-size: 11px;
       color: var(--text);
       white-space: nowrap;
@@ -115,66 +196,57 @@
 
     .bar-track {
       flex: 1;
-      height: 14px;
-      background: var(--border);
-      position: relative;
+      height: 12px;
+      background: var(--bg);
+      border-radius: 6px;
       overflow: hidden;
+      position: relative;
     }
+
+    /* Budget reference line — commented out until budget feature is built
+    .budget-line {
+      position: absolute;
+      top: 0;
+      height: 100%;
+      width: 2px;
+      background: rgba(0,0,0,0.25);
+      z-index: 2;
+    }
+    */
 
     .bar-fill {
       height: 100%;
-      background: var(--accent);
-      transition: width 0.6s ease;
-      position: relative;
-    }
-
-    .bar-fill::after {
-      content: '';
-      position: absolute;
-      top: 0; right: 0;
-      width: 2px;
-      height: 100%;
-      background: rgba(255,255,255,0.3);
+      border-radius: 6px;
+      transition: width 0.5s ease;
     }
 
     .bar-value {
-      font-family: 'IBM Plex Mono', monospace;
+      font-family: 'DM Mono', monospace;
       font-size: 11px;
-      color: var(--accent);
-      width: 60px;
+      color: var(--text);
+      width: 55px;
       text-align: right;
       flex-shrink: 0;
     }
 
     /* ── PIE CHART ── */
-    .pie-section {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      padding: 14px;
-      margin-bottom: 20px;
-    }
-
     .pie-container {
       display: flex;
       align-items: center;
       gap: 16px;
     }
 
-    canvas#pieChart {
-      flex-shrink: 0;
-    }
-
     .pie-legend {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 5px;
     }
 
     .legend-item {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 7px;
       font-size: 11px;
     }
 
@@ -194,38 +266,95 @@
     }
 
     .legend-pct {
-      font-family: 'IBM Plex Mono', monospace;
+      font-family: 'DM Mono', monospace;
       color: var(--muted);
+      font-size: 10px;
+    }
+
+    /* ── ACCOUNT FLOW ── */
+    .account-row { margin-bottom: 14px; }
+    .account-row:last-child { margin-bottom: 0; }
+
+    .account-name {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .flow-bars { display: flex; flex-direction: column; gap: 4px; }
+
+    .flow-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .flow-label {
+      width: 28px;
+      font-size: 10px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .flow-label.in  { color: var(--income); }
+    .flow-label.out { color: var(--expense); }
+
+    .flow-track {
+      flex: 1;
+      height: 10px;
+      background: var(--bg);
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .flow-fill {
+      height: 100%;
+      border-radius: 5px;
+      transition: width 0.5s ease;
+    }
+
+    .flow-fill.in  { background: var(--income); }
+    .flow-fill.out { background: var(--expense); }
+
+    .flow-amount {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      width: 55px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .flow-amount.in  { color: var(--income); }
+    .flow-amount.out { color: var(--expense); }
+
+    .account-net {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      margin-top: 4px;
+      text-align: right;
     }
 
     /* ── RECENT TRANSACTIONS ── */
-    .transactions {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      margin-bottom: 20px;
-    }
-
     .tx-row {
       display: grid;
-      grid-template-columns: 40px 14px 70px 1fr 80px;
-      gap: 8px;
+      grid-template-columns: 36px 14px 65px 1fr 70px;
+      gap: 6px;
       align-items: center;
-      padding: 9px 14px;
+      padding: 8px 0;
       border-bottom: 1px solid var(--border);
-      transition: background 0.15s;
     }
 
     .tx-row:last-child { border-bottom: none; }
-    .tx-row:hover { background: #222; }
 
     .tx-date {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 11px;
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
       color: var(--muted);
     }
 
     .tx-type {
-      font-family: 'IBM Plex Mono', monospace;
+      font-family: 'DM Mono', monospace;
       font-size: 10px;
       font-weight: 600;
     }
@@ -234,7 +363,7 @@
     .tx-type.I { color: var(--income); }
 
     .tx-category {
-      font-size: 11px;
+      font-size: 10px;
       color: var(--muted);
       white-space: nowrap;
       overflow: hidden;
@@ -250,20 +379,94 @@
     }
 
     .tx-cost {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 12px;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
       text-align: right;
     }
 
     .tx-cost.E { color: var(--expense); }
     .tx-cost.I { color: var(--income); }
 
+    /* ── REIMBURSABLES ── */
+    .reimb-row {
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      transition: opacity 0.3s;
+    }
+
+    .reimb-row:last-child { border-bottom: none; }
+
+    .reimb-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .reimb-info { flex: 1; }
+
+    .reimb-vendor {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .reimb-meta {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    .reimb-tag {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-size: 10px;
+      font-weight: 600;
+      margin-right: 6px;
+    }
+
+    .reimb-tag.owed { background: #fef2f2; color: var(--expense); }
+    .reimb-tag.owe  { background: #f0fdf4; color: var(--income); }
+
+    .reimb-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+      flex-shrink: 0;
+      margin-left: 10px;
+    }
+
+    .reimb-cost {
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .reimb-cost.owed { color: var(--income); }
+    .reimb-cost.owe  { color: var(--expense); }
+
+    .done-btn {
+      padding: 4px 12px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .done-btn:hover    { background: var(--accent2); }
+    .done-btn:disabled { background: var(--muted); cursor: default; }
+
     /* ── LOADING / ERROR ── */
     .state {
       text-align: center;
-      padding: 40px 20px;
+      padding: 24px 20px;
       color: var(--muted);
-      font-family: 'IBM Plex Mono', monospace;
       font-size: 12px;
     }
 
@@ -271,8 +474,8 @@
 
     .spinner {
       display: inline-block;
-      width: 16px;
-      height: 16px;
+      width: 18px;
+      height: 18px;
       border: 2px solid var(--border);
       border-top-color: var(--accent);
       border-radius: 50%;
@@ -286,249 +489,372 @@
       display: block;
       width: 100%;
       padding: 10px;
-      background: transparent;
+      background: var(--surface);
       border: 1px solid var(--border);
+      border-radius: 8px;
       color: var(--muted);
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
       cursor: pointer;
-      transition: border-color 0.2s, color 0.2s;
+      transition: border-color 0.15s, color 0.15s;
+      margin-top: 4px;
     }
 
     .refresh-btn:hover {
       border-color: var(--accent);
       color: var(--accent);
     }
+
+    .empty-note {
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      padding: 10px 0;
+    }
   </style>
 </head>
 <body>
 
   <header>
-    <h1>// expenses</h1>
-    <span class="month" id="monthLabel">loading...</span>
+    <h1>Expenses</h1>
+    <span id="periodLabel"></span>
   </header>
+
+  <div class="period-bar">
+    <div class="preset-row">
+      <button class="preset-btn active" data-preset="thisMonth">This Month</button>
+      <button class="preset-btn" data-preset="lastMonth">Last Month</button>
+      <button class="preset-btn" data-preset="last7">Last 7 Days</button>
+      <button class="preset-btn" data-preset="last30">Last 30 Days</button>
+      <button class="preset-btn" data-preset="custom">Custom</button>
+    </div>
+    <div class="custom-range" id="customRange">
+      <input type="text" id="startDate" placeholder="M-D-YYYY">
+      <span>to</span>
+      <input type="text" id="endDate" placeholder="M-D-YYYY">
+      <button class="go-btn" onclick="loadCustom()">Go</button>
+    </div>
+  </div>
 
   <div id="app">
     <div class="state">
       <div class="spinner"></div>
-      <div>fetching data...</div>
+      <div>Fetching data...</div>
     </div>
   </div>
 
   <script>
-    // ─────────────────────────────────────────
-    //  CONFIG — paste your deployment URL here
-    // ─────────────────────────────────────────
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz1m92kfW8ePdU26NrmlfDxV3QYorf-6IbD02na6fSJP6pDDqWWJX60u8ddptWlys1e/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbygCLknnrL2rNz8tU-qgIveO1mi_vqaX61n1YET-oHFqs4nTRgdoCIvCn7N4j1gz0yz/exec";
 
     const COLORS = [
-      "#00e5a0","#ff6b6b","#ffd93d","#6bcbff","#c77dff",
-      "#ff9f43","#a8e063","#fd79a8","#74b9ff","#fdcb6e"
+      "#2563eb","#f59e0b","#10b981","#ef4444","#8b5cf6",
+      "#ec4899","#06b6d4","#84cc16","#f97316","#6366f1"
     ];
 
-    function loadData() {
-      const app = document.getElementById("app");
+    let currentParams = "?preset=thisMonth";
 
-      const xhr     = new XMLHttpRequest();
-      const timeout = setTimeout(() => {
-        xhr.abort();
-        app.innerHTML = `
-          <div class="state error">request timed out — script may be cold starting, try refreshing</div>
-          <button class="refresh-btn" style="margin-top:12px" onclick="location.reload()">↺  retry</button>
-        `;
-      }, 20000);
-
-      xhr.open("GET", `${SCRIPT_URL}?action=getPageData`, true);
-      xhr.onreadystatechange = function() {
-        if (xhr.readyState !== 4) return;
-        clearTimeout(timeout);
-        if (xhr.status === 200) {
-          try {
-            const data = JSON.parse(xhr.responseText);
-            render(data);
-          } catch(e) {
-            app.innerHTML = `<div class="state error">failed to parse response: ${e.message}</div>`;
-          }
+    document.querySelectorAll(".preset-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".preset-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        const preset = btn.dataset.preset;
+        if (preset === "custom") {
+          document.getElementById("customRange").classList.add("visible");
         } else {
-          app.innerHTML = `
-            <div class="state error">failed to load: HTTP ${xhr.status}</div>
-            <button class="refresh-btn" style="margin-top:12px" onclick="location.reload()">↺  retry</button>
-          `;
+          document.getElementById("customRange").classList.remove("visible");
+          loadData(`?preset=${preset}`);
         }
-      };
-      xhr.onerror = function() {
-        clearTimeout(timeout);
-        app.innerHTML = `
-          <div class="state error">network error — check your connection and try again</div>
-          <button class="refresh-btn" style="margin-top:12px" onclick="location.reload()">↺  retry</button>
-        `;
-      };
-      xhr.send();
+      });
+    });
+
+    function loadCustom() {
+      const start = document.getElementById("startDate").value.trim();
+      const end   = document.getElementById("endDate").value.trim();
+      if (!start || !end) return;
+      loadData(`?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`);
     }
 
-    function render(data) {
-      const { recent, categoryTotals, monthTotal, month } = data;
-      document.getElementById("monthLabel").textContent = month;
+    function xhr(url, cb) {
+      const req     = new XMLHttpRequest();
+      const timeout = setTimeout(() => req.abort(), 20000);
+      req.open("GET", url, true);
+      req.onreadystatechange = function() {
+        if (req.readyState !== 4) return;
+        clearTimeout(timeout);
+        if (req.status === 200) {
+          try { cb(null, JSON.parse(req.responseText)); }
+          catch(e) { cb(e); }
+        } else {
+          cb(new Error(`HTTP ${req.status}`));
+        }
+      };
+      req.onerror = () => { clearTimeout(timeout); cb(new Error("Network error")); };
+      req.send();
+    }
+
+    function loadData(params) {
+      currentParams = params;
+      const app = document.getElementById("app");
+      app.innerHTML = `<div class="state"><div class="spinner"></div><div>Fetching data...</div></div>`;
+
+      const url = `${SCRIPT_URL}?action=getPageData${params.replace("?","&")}`;
+      xhr(url, (err, data) => {
+        if (err) {
+          app.innerHTML = `
+            <div class="state error">Failed to load: ${err.message}</div>
+            <button class="refresh-btn" onclick="loadData('${params}')">↺ Retry</button>`;
+          return;
+        }
+        renderDashboard(data);
+        loadReimbursables();
+      });
+    }
+
+    function loadReimbursables() {
+      xhr(`${SCRIPT_URL}?action=getReimbursables`, (err, data) => {
+        if (!err) renderReimbursables(data);
+      });
+    }
+
+    function renderDashboard(data) {
+      const { recent, categoryTotals, accountFlow, paycheckTotal, otherIncome, totalExpenses, totalIncome, periodLabel } = data;
+      document.getElementById("periodLabel").textContent = periodLabel;
 
       const app = document.getElementById("app");
       app.innerHTML = "";
 
-      // ── Total Banner ──
-      const banner = document.createElement("div");
-      banner.className = "total-banner";
-      banner.innerHTML = `
-        <span class="label">Month to Date</span>
-        <span class="amount">$${monthTotal.toFixed(2)}</span>
+      // ── Summary strip ──
+      const net    = totalIncome - totalExpenses;
+      const netCls = net >= 0 ? "net-pos" : "net-neg";
+      const strip  = mk("div", "summary-strip");
+      strip.innerHTML = `
+        <div class="summary-tile"><div class="s-label">Income</div><div class="s-value income">$${fmt(totalIncome)}</div></div>
+        <div class="summary-tile"><div class="s-label">Expenses</div><div class="s-value expense">$${fmt(totalExpenses)}</div></div>
+        <div class="summary-tile"><div class="s-label">Net</div><div class="s-value ${netCls}">${net>=0?"+":""}$${fmt(net)}</div></div>
       `;
-      app.appendChild(banner);
+      app.appendChild(strip);
 
-      // ── Bar Chart ──
-      const sorted = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1]);
-      const max    = sorted.length ? sorted[0][1] : 1;
-
-      const barSection = document.createElement("div");
-      barSection.innerHTML = `<div class="section-title">Spending by Category</div>`;
-      const barChart = document.createElement("div");
-      barChart.className = "bar-chart";
-
-      sorted.forEach(([cat, amt], i) => {
-        const pct = (amt / max) * 100;
-        const row = document.createElement("div");
-        row.className = "bar-row";
-        row.innerHTML = `
-          <div class="bar-label">${cat}</div>
-          <div class="bar-track">
-            <div class="bar-fill" style="width:0%;background:${COLORS[i % COLORS.length]}" data-width="${pct}"></div>
-          </div>
-          <div class="bar-value" style="color:${COLORS[i % COLORS.length]}">$${amt.toFixed(0)}</div>
-        `;
-        barChart.appendChild(row);
-      });
-
-      barSection.appendChild(barChart);
-      app.appendChild(barSection);
-
-      // Animate bars after render
-      setTimeout(() => {
-        document.querySelectorAll(".bar-fill").forEach(el => {
-          el.style.width = el.dataset.width + "%";
+      // ── Category bar chart ──
+      const sorted = Object.entries(categoryTotals).sort((a,b) => b[1]-a[1]);
+      if (sorted.length > 0) {
+        const card = mkCard("Spending by Category");
+        const max  = sorted[0][1];
+        sorted.forEach(([cat, amt], i) => {
+          const row = mk("div", "bar-row");
+          row.innerHTML = `
+            <div class="bar-label">${cat}</div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width:0%;background:${COLORS[i%COLORS.length]}" data-w="${(amt/max)*100}"></div>
+              <!-- Budget reference: uncomment and replace BUDGET_PCT with (budget/max)*100 when budgets are configured
+              <div class="budget-line" style="left:BUDGET_PCT%"></div> -->
+            </div>
+            <div class="bar-value">$${fmt(amt)}</div>`;
+          card.appendChild(row);
         });
-      }, 50);
+        app.appendChild(card);
+        animateBars(".bar-fill");
+      }
 
-      // ── Pie Chart ──
-      const pieSection = document.createElement("div");
-      pieSection.innerHTML = `<div class="section-title">Distribution</div>`;
-      const pieWrap = document.createElement("div");
-      pieWrap.className = "pie-section";
+      // ── Pie chart ──
+      if (sorted.length > 0) {
+        const card   = mkCard("Distribution");
+        const wrap   = mk("div", "pie-container");
+        const canvas = document.createElement("canvas");
+        canvas.width = 120; canvas.height = 120;
+        const legend = mk("div", "pie-legend");
+        sorted.forEach(([cat, amt], i) => {
+          const pct = totalExpenses > 0 ? ((amt/totalExpenses)*100).toFixed(1) : 0;
+          const li  = mk("div", "legend-item");
+          li.innerHTML = `
+            <div class="legend-dot" style="background:${COLORS[i%COLORS.length]}"></div>
+            <div class="legend-name">${cat}</div>
+            <div class="legend-pct">${pct}%</div>`;
+          legend.appendChild(li);
+        });
+        wrap.appendChild(canvas);
+        wrap.appendChild(legend);
+        card.appendChild(wrap);
+        app.appendChild(card);
+        drawPie(canvas, sorted, totalExpenses);
+      }
 
-      const pieContainer = document.createElement("div");
-      pieContainer.className = "pie-container";
+      // ── Account flow ──
+      const accounts = Object.entries(accountFlow);
+      if (accounts.length > 0) {
+        const card    = mkCard("Account Flow");
+        const maxFlow = Math.max(...accounts.map(([,v]) => Math.max(v.in, v.out)));
+        accounts.forEach(([acct, flow]) => {
+          const net    = flow.in - flow.out;
+          const netCls = net >= 0 ? "color:var(--income)" : "color:var(--expense)";
+          const row    = mk("div", "account-row");
+          row.innerHTML = `
+            <div class="account-name">${acct}</div>
+            <div class="flow-bars">
+              <div class="flow-row">
+                <div class="flow-label in">IN</div>
+                <div class="flow-track"><div class="flow-fill in" style="width:0%" data-w="${(flow.in/maxFlow)*100}"></div></div>
+                <div class="flow-amount in">$${fmt(flow.in)}</div>
+              </div>
+              <div class="flow-row">
+                <div class="flow-label out">OUT</div>
+                <div class="flow-track"><div class="flow-fill out" style="width:0%" data-w="${(flow.out/maxFlow)*100}"></div></div>
+                <div class="flow-amount out">$${fmt(flow.out)}</div>
+              </div>
+            </div>
+            <div class="account-net" style="${netCls}">Net: ${net>=0?"+":""}$${flow.in>0||flow.out>0?Math.abs(net).toFixed(2):"0.00"}</div>`;
+          card.appendChild(row);
+        });
+        app.appendChild(card);
+        animateBars(".flow-fill");
+      }
 
-      const canvas = document.createElement("canvas");
-      canvas.id = "pieChart";
-      canvas.width = 130;
-      canvas.height = 130;
-      pieContainer.appendChild(canvas);
+      // ── Income breakdown ──
+      if (paycheckTotal > 0 || otherIncome > 0) {
+        const card   = mkCard("Income Breakdown");
+        const maxInc = Math.max(paycheckTotal, otherIncome) || 1;
+        [["Paycheck", paycheckTotal, "#2563eb"], ["Other Income", otherIncome, "#10b981"]].forEach(([label, amt, color]) => {
+          if (amt === 0) return;
+          const row = mk("div", "bar-row");
+          row.innerHTML = `
+            <div class="bar-label">${label}</div>
+            <div class="bar-track"><div class="bar-fill" style="width:0%;background:${color}" data-w="${(amt/maxInc)*100}"></div></div>
+            <div class="bar-value">$${fmt(amt)}</div>`;
+          card.appendChild(row);
+        });
+        app.appendChild(card);
+        animateBars(".bar-fill");
+      }
 
-      const legend = document.createElement("div");
-      legend.className = "pie-legend";
-      sorted.forEach(([cat, amt], i) => {
-        const pct = monthTotal > 0 ? ((amt / monthTotal) * 100).toFixed(1) : 0;
-        const item = document.createElement("div");
-        item.className = "legend-item";
-        item.innerHTML = `
-          <div class="legend-dot" style="background:${COLORS[i % COLORS.length]}"></div>
-          <div class="legend-name">${cat}</div>
-          <div class="legend-pct">${pct}%</div>
-        `;
-        legend.appendChild(item);
-      });
-
-      pieContainer.appendChild(legend);
-      pieWrap.appendChild(pieContainer);
-      pieSection.appendChild(pieWrap);
-      app.appendChild(pieSection);
-
-      // Draw pie
-      drawPie(canvas, sorted, monthTotal);
-
-      // ── Recent Transactions ──
-      const txSection = document.createElement("div");
-      txSection.innerHTML = `<div class="section-title">Recent Transactions</div>`;
-      const txList = document.createElement("div");
-      txList.className = "transactions";
-
+      // ── Recent transactions ──
+      const txCard = mkCard("Recent Transactions");
       if (!recent || recent.length === 0) {
-        txList.innerHTML = `<div class="state">no transactions found</div>`;
+        txCard.innerHTML += `<div class="empty-note">No transactions in this period</div>`;
       } else {
         recent.forEach(tx => {
-          const row = document.createElement("div");
-          row.className = "tx-row";
-          const t = tx.type === "Income" ? "I" : "E";
+          const t   = tx.type === "Income" ? "I" : "E";
+          const row = mk("div", "tx-row");
           row.innerHTML = `
             <div class="tx-date">${tx.date}</div>
             <div class="tx-type ${t}">${t}</div>
             <div class="tx-category">${tx.category}</div>
-            <div class="tx-vendor">${tx.vendor || "—"}</div>
-            <div class="tx-cost ${t}">$${tx.cost.toFixed(2)}</div>
-          `;
-          txList.appendChild(row);
+            <div class="tx-vendor">${tx.vendor||"—"}</div>
+            <div class="tx-cost ${t}">$${tx.cost.toFixed(2)}</div>`;
+          txCard.appendChild(row);
         });
       }
+      app.appendChild(txCard);
 
-      txSection.appendChild(txList);
-      app.appendChild(txSection);
+      // Reimbursables placeholder
+      const rCard = mk("div", "card");
+      rCard.id = "reimbCard";
+      rCard.innerHTML = `<div class="card-title">Reimbursables</div><div class="state"><div class="spinner"></div></div>`;
+      app.appendChild(rCard);
 
-      // ── Refresh Button ──
+      // Refresh
       const btn = document.createElement("button");
       btn.className = "refresh-btn";
-      btn.textContent = "↺  refresh";
-      btn.onclick = () => {
-        app.innerHTML = `<div class="state"><div class="spinner"></div><div>fetching data...</div></div>`;
-        loadData();
-      };
+      btn.textContent = "↺  Refresh";
+      btn.onclick = () => loadData(currentParams);
       app.appendChild(btn);
+    }
+
+    function renderReimbursables(list) {
+      const card = document.getElementById("reimbCard");
+      if (!card) return;
+      card.innerHTML = `<div class="card-title">Reimbursables</div>`;
+      if (!list || list.length === 0) {
+        card.innerHTML += `<div class="empty-note">No outstanding reimbursables ✓</div>`;
+        return;
+      }
+      list.forEach(tx => {
+        const isOwed  = tx.type === "Expense";
+        const tagCls  = isOwed ? "owed" : "owe";
+        const tagText = isOwed ? "Owed to you" : "You owe";
+        const costCls = isOwed ? "owed" : "owe";
+        const row     = mk("div", "reimb-row");
+        row.innerHTML = `
+          <div class="reimb-top">
+            <div class="reimb-info">
+              <div class="reimb-vendor">${tx.vendor||"—"}</div>
+              <div class="reimb-meta">
+                <span class="reimb-tag ${tagCls}">${tagText}</span>
+                ${tx.date} · ${tx.category} · ${tx.account}
+              </div>
+            </div>
+            <div class="reimb-right">
+              <div class="reimb-cost ${costCls}">$${tx.cost.toFixed(2)}</div>
+              <button class="done-btn" onclick="settle('${tx.timestamp.replace(/'/g,"\\'")}', this)">Done</button>
+            </div>
+          </div>`;
+        card.appendChild(row);
+      });
+    }
+
+    function settle(timestamp, btn) {
+      btn.disabled    = true;
+      btn.textContent = "...";
+      xhr(`${SCRIPT_URL}?action=settleTransaction&timestamp=${encodeURIComponent(timestamp)}`, (err, res) => {
+        if (!err && res.success) {
+          btn.closest(".reimb-row").style.opacity = "0.3";
+          btn.textContent = "✓";
+        } else {
+          btn.disabled    = false;
+          btn.textContent = "Retry";
+        }
+      });
     }
 
     function drawPie(canvas, sorted, total) {
       const ctx = canvas.getContext("2d");
       const cx  = canvas.width / 2;
       const cy  = canvas.height / 2;
-      const r   = cx - 8;
-
-      if (total === 0 || sorted.length === 0) {
-        ctx.beginPath();
-        ctx.arc(cx, cy, r, 0, Math.PI * 2);
-        ctx.fillStyle = "#2a2a2a";
-        ctx.fill();
-        return;
-      }
-
-      let startAngle = -Math.PI / 2;
-      sorted.forEach(([cat, amt], i) => {
+      const r   = cx - 6;
+      if (!total) return;
+      let start = -Math.PI / 2;
+      sorted.forEach(([, amt], i) => {
         const slice = (amt / total) * Math.PI * 2;
         ctx.beginPath();
         ctx.moveTo(cx, cy);
-        ctx.arc(cx, cy, r, startAngle, startAngle + slice);
+        ctx.arc(cx, cy, r, start, start + slice);
         ctx.closePath();
         ctx.fillStyle = COLORS[i % COLORS.length];
         ctx.fill();
-        ctx.strokeStyle = "#0f0f0f";
+        ctx.strokeStyle = "#fff";
         ctx.lineWidth = 2;
         ctx.stroke();
-        startAngle += slice;
+        start += slice;
       });
-
-      // Donut hole
       ctx.beginPath();
       ctx.arc(cx, cy, r * 0.5, 0, Math.PI * 2);
-      ctx.fillStyle = "#1a1a1a";
+      ctx.fillStyle = "#fff";
       ctx.fill();
     }
 
-    loadData();
+    function animateBars(selector) {
+      setTimeout(() => {
+        document.querySelectorAll(selector).forEach(b => {
+          if (b.dataset.w) b.style.width = b.dataset.w + "%";
+        });
+      }, 60);
+    }
+
+    function mk(tag, cls) {
+      const e = document.createElement(tag);
+      if (cls) e.className = cls;
+      return e;
+    }
+
+    function mkCard(title) {
+      const c = mk("div", "card");
+      c.innerHTML = `<div class="card-title">${title}</div>`;
+      return c;
+    }
+
+    function fmt(n) {
+      return Math.abs(n).toFixed(0);
+    }
+
+    loadData("?preset=thisMonth");
   </script>
 </body>
 </html>
